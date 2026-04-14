@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "task-queue"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "redis[asyncio]>=5.0",
+    "msgpack>=1.0",
+    "click>=8.1",
+    "rich>=13.0",
+]
+
+[project.scripts]
+task-queue = "cli.main:cli"
+
+[tool.setuptools.packages.find]
+where = ["."]
