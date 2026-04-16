@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.worker
+    environment:
+      REDIS_URL: redis://redis:6379
+      QUEUES: default,emails,reports
+      CONCURRENCY: 4
+      NUM_WORKERS: 2
+    depends_on:
+      redis:
+        condition: service_healthy
+    deploy:
+      replicas: 4
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.worker
+    command: task-queue --redis-url redis://redis:6379 dashboard
+    depends_on:
+      redis:
+        condition: service_healthy
+    stdin_open: true
+    tty: true

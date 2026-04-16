@@ -1,0 +1,21 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+COPY pyproject.toml .
+COPY broker/ broker/
+COPY worker/ worker/
+COPY monitor/ monitor/
+COPY cli/ cli/
+COPY tasks/ tasks/
+
+RUN pip install --no-cache-dir -e .
+
+ENV REDIS_URL=redis://redis:6379
+ENV QUEUES=default,emails,reports
+ENV CONCURRENCY=4
+ENV NUM_WORKERS=2
+
+CMD task-queue --redis-url $REDIS_URL start \
+    --queues $QUEUES \
+    --workers $NUM_WORKERS \
+    --concurrency $CONCURRENCY
